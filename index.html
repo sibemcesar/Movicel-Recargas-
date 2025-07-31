@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>recarga movicel/africell</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    html,body {
+      margin:0; padding:0; height:100%; background:white;
+      font-family: Arial, Helvetica, sans-serif; color:#c20021;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body { 
+      min-height:100vh; display:flex; flex-direction:column; transition: background 0.3s;
+    }
+   .header {
+  position:fixed;
+  width: 100vw;
+  height: 64px;
+  background-color: #DC0826;  /* Roxo africell */
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 2.1em;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 0.015em;
+  user-select: none;
+}
+
+.header-logo {
+  font-family: 'bold', Arial, sans-serif;
+  font-weight: 700;
+  font-size: 1.2em;
+  color: #fff;
+  text-align: left;
+  position: relative;
+  letter-spacing: 0.05em;
+  user-select: none;
+  margin-top: 5px;
+  margin-left: 15px;
+}
+
+/* Sinal Wi-Fi acima do "i" */
+.header-logo::after {
+  content: "";
+  position: absolute;
+  top: -0.9em;
+  left: 54%;
+  font-size: 1.4em;
+  color: #ed5c29; /* laranja parecido com o da imagem */
+  user-select: none;
+  pointer-events: none;
+}
+
+    .subheader {
+      text-align:center; font-size:1.02em; color:#c20021;
+      font-weight:600; background:none; margin:10px 0 0 0; min-height:21px;
+    }
+    .content {
+      flex:1 1 auto; width:100vw; padding-bottom:92px;
+      min-height:0;
+    }
+    .card-confirm {
+      width:90vw; max-width:370px; margin:18px auto 16px auto;
+      background: #c20021;
+      color:#fff; font-weight:700; font-size:1.00em;
+      border-radius:15px; padding:15px 18px 15px 23px; display:flex;
+      gap:10px; align-items:center; text-align:left;
+      box-sizing:border-box; line-height:1.3;
+      letter-spacing:.01em; box-shadow:0 1px 8px rgba(64,64,88,0.07);
+      animation: slideCard .35s;
+    }
+    @keyframes slideCard {
+      from { transform: translateY(30px) scale(.96); opacity:0; }
+      to   { transform: translateY(0) scale(1);  opacity:1;}
+    }
+    .label {
+      color:#c20021; font-size:1.09em; text-align:center;
+      margin:10px 0 12px 0; font-weight:700;
+    }
+    .input-group {
+      width:90vw; max-width:370px; background:#fff; border-radius:8px;
+      border:1.4px solid #bbb; display:flex; align-items:center;
+      margin:0 auto 13px auto; position:relative;
+      box-sizing:border-box;
+      animation: fadeIn .4s;
+    }
+   @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px);}
+      to   { opacity: 1; transform: translateY(0);}
+    }
+    .input-group input {
+      width:100%; border:none; background:transparent;
+      padding:14px 32px 14px 34px; font-size:1.10em;
+      outline:none; font-weight:600; color:#333;
+      border-radius:7px; letter-spacing:0.18em;
+    }
+    .input-group .icon {
+      position:absolute; left:10px; top:50%; transform:translateY(-50%);
+      font-size:1.24em; color:#444; opacity:.70;
+    }
+    .input-group .toggle-visibility {
+      position:absolute; right:10px; top:50%; transform:translateY(-50%);
+      background: none; border:none; color:#c20021; font-size:1.13em;
+      cursor:pointer; opacity:.82;
+    }
+    .btn-confirm {
+      display:flex; flex-direction:row; align-items:center; gap:10px;
+      margin:36px auto 0 auto; font-size:1.17em; background:#c20021;
+      border:none; color:white; border-radius:28px;
+      width:90vw; max-width:370px; height:51px; justify-content:center;
+      font-weight:700; box-shadow:0 2px 13px rgba(137,21,125,0.11);
+      cursor:pointer; transition:background .21s;
+    }
+    .btn-confirm:active { background:#702563; box-shadow:0 2px 7px rgba(137,21,125,0.10);}
+    .btn-confirm svg {width:2em;height:2em;min-width:25px;margin-right:8px;}
+    .erro {color:#e74c3c; font-weight:600; margin:15px auto 0 auto;
+      text-align:center;font-size:1em;max-width:340px;}
+    .loading-bg {
+      position:fixed; top:0; left:0; right:0; bottom:0; width:100vw;height:100vh;
+      background:rgba(255,255,255,0.91); z-index:999; display:flex; justify-content:center; align-items:center; flex-direction:column; animation:fadeIn .33s;
+    }
+    .circle-loader {
+      border:7px solid #ededed; border-top:7px solid #c20021;
+      border-radius:50%; width:56px; height:56px;
+      animation:spin .85s linear infinite; margin-bottom:9px;
+    }
+    @keyframes spin {0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+    .loading-text {color:#c20021;font-size:1.12em;font-weight:700;}
+   .footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+  height: 59px;
+  background: #c20021;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 11;
+  transition: none; /* como não usaremos transição */
+}
+
+.footer.hide {
+  display: none !important;
+}
+
+.footer-item {
+  display:flex; flex-direction:column; align-items:center;
+  color:#fff;
+  font-size:0.93em;
+  font-weight:bold;
+  cursor:pointer;
+  text-decoration:none;
+  padding:3px 11px;
+  transition:color .15s;
+}
+.footer-item svg {
+  width:25px; height:25px; fill:#fff; margin-bottom:1px; transition:fill .16s;
+}
+.footer-item.active {color:#11bcaa;}
+.footer-item.active svg {fill:#11bcaa;}
+
+.fab-footer-btn {
+  position: fixed;
+  bottom: 70px; /* um pouco acima do footer */
+  right: 20px;
+  z-index: 20;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #c20021;
+  box-shadow: 0 3px 12px #c2002199;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8em;
+  color: #c20021;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.fab-footer-btn:active {
+  background: #f9b1b1;
+}
+    .list-container {
+      width:90vw;max-width:390px; background:#f9f8fa;
+      border-radius:11px; padding:14px 7px 7px 7px; margin:20px auto 0 auto;
+      box-shadow:0 1px 8px rgba(64,64,90,0.07);min-height:60px;
+    }
+    .list-item {
+      display:flex;justify-content:space-between;align-items:center;
+      padding:12px 2px 9px 2px;border-bottom:1px solid #eee;
+      font-size:0.98em;color:#46455e;
+    }
+    .list-item:last-child {border-bottom:none;}
+    .list-item-info {display:flex;flex-direction:column;gap:1px;}
+    .list-item-info strong {color:#46455e;font-size:1.06em;}
+    .list-item-actions button {
+      background:none;border:none;color:#c20021;
+      font-size:1em;cursor:pointer;padding:3px;margin-right:7px;
+      border-radius:4px;
+    }
+    .list-item-actions button:last-child {margin-right:0;}
+    .add-contact-form {display:flex; flex-direction:column; gap:8px; margin-top:10px;}
+    .add-contact-form input {
+      padding:9px; border:1.2px solid #ccc; border-radius:5px; font-size:1em;
+    }
+    .toggle-contact-btn {
+  display: block;
+  margin: 0 auto 14px auto;
+  background: #F70106;
+  color: #fff;
+  font-weight: bold;
+  font-size: 1em;
+  border: none;
+  border-radius: 24px;
+  padding: 8px 20px;
+  box-shadow: 0 2px 8px #a2156d20;
+  cursor: pointer;
+  transition: background .19s;
+}
+.toggle-contact-btn:active { background: #8b1259; }
+
+.add-contact-wrapper {
+  max-height: 460px;
+  opacity: 1;
+  transition: max-height .36s cubic-bezier(.7,.08,.48,1.09), opacity .23s;
+  overflow: hidden;
+}
+.add-contact-wrapper.hide {
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.add-contact-form {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+.add-contact-form input {
+  border: 1.1px solid #a2156d;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 1em;
+  margin-bottom: 0;
+  min-width: 80%;
+  max-width: 95%;
+}
+.add-contact-form button[type="submit"] {
+  background: #F70106;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+    .empty-list-message {text-align:center; color:#888;font-style:italic;margin-top:13px;}
+    .btn-clear-all {
+      width:100%; background:#c20021; color:#fff;
+      border:none; border-radius:21px; padding:9px 0;
+      margin-bottom:11px;font-weight:bold;font-size:1em;cursor:pointer;
+      margin-top:3px; display:block;
+    }
+    @media (max-width: 690px) {
+      .header { font-size:1.12em; min-height:40px;}
+      .card-confirm { font-size:0.97em; }
+      .input-group, .btn-confirm { width: 97vw; max-width:98vw;}
+      .list-container {width:97vw;max-width:98vw;}
+    }
+    @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  
+   .carousel-container {
+  width: 95vw;
+  max-width: 390px;
+  margin: 20px auto 10px auto;
+  overflow: hidden;
+  border-radius: 13px;
+  position: relative;
+  box-shadow: 0 2px 8px #c2002120;
+  background: #fff;
+}
+.carousel-track {
+  display: flex;
+  transition: transform 0.4s cubic-bezier(.45,.15,.5,1.1);
+  width: 200%; /* Para 2 slides */
+}
+.carousel-slide {
+  width: 95vw;
+  max-width: 390px;
+  object-fit: cover;
+  display: block;
+}
+.carousel-btn {
+  position: absolute;
+  top: 50%; transform: translateY(-50%);
+  background: rgba(194,0,33,0.95);
+  border: none;
+  color: #fff;
+  font-size: 1.9em;
+  padding: 3px 12px 3px 12px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+  opacity: 0.83;
+  transition: background .2s;
+}
+.carousel-btn:hover { background: #960014; }
+.carousel-btn.left { left: 6px; }
+.carousel-btn.right { right: 6px; }
+
+  .quick-value-row {
+  display: flex;
+  gap: 13px;
+  justify-content: center;
+  margin-bottom: 18px;
+  margin-top: 8px;
+}
+.quick-value-btn {
+  background: #350035;
+  color: #fff;
+  font-weight: bold;
+  font-size: 1.06em;
+  border: none;
+  border-radius: 11px;
+  padding: 12px 19px;
+  box-shadow: 0 2px 8px #11bcaa22;
+  cursor: pointer;
+  transition: background .15s, box-shadow .17s, outline .12s;
+  outline: 0 solid #0f837c00;
+}
+.quick-value-btn:active,
+.quick-value-btn.selected {
+  background: #0f9185;
+  outline: 2.5px solid #c20021BB;
+}
+
+  #valorTotal.valor {
+  display: inline-block;
+  background: #12b2b1;
+  color: #fff;
+  border-radius: 14px;
+  font-weight: bold;
+  font-size: 1.22em;
+  padding: 17px 32px;
+  min-width: 180px;
+  letter-spacing: 0.01em;
+  margin: 18px auto 10px auto;
+  box-shadow: 0 2px 10px #11bcaa28;
+  text-align: center;
+}
+    .theme-toggle-btn {
+  position: absolute;
+  right: 15px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.7em;
+  cursor: pointer;
+  user-select: none;
+  z-index: 10;
+}
+  @keyframes fadeInScale {
+    from {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  </style>
+</head>
+<body>
+  <!-- HTML do header -->
+<div class="header">
+    <div class="header-logo">Recargas Movicel</div>
+  <button id="btnShowStorage" style="background:#DC0826; color:#fff; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; margin-left: auto;"><svg 
+  xmlns="http://www.w3.org/2000/svg" 
+  fill="none" 
+  viewBox="0 0 24 24" 
+  stroke="currentColor" 
+  stroke-width="1.5" 
+  stroke-linecap="round" 
+  stroke-linejoin="round" 
+  width="24" 
+  height="24" 
+  style="color: #fff;"  <!-- Exemplo de cor padrão em vermelho -->
+  class="size-6"
+>
+  <path d="M10.5 6a7.5 7.5 0 1 0 7.5 7.5h-7.5V6Z" />
+  <path d="M13.5 10.5H21A7.5 7.5 0 0 0 13.5 3v7.5Z" />
+</svg>
+</button>
+ <button id="toggleFooterBtn" class="fab-footer-btn" aria-label="Mostrar/Ocultar menu"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+</svg>
+</button>
+  
+  <button id="btnSobreMovicel" 
+  title="Sobre o App de Recarga Movicel"
+  style="
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    width: 38px;
+    height: 38px;
+    border-radius: 6px;
+    box-shadow: 0 0 8px transparent;
+    transition: background-color 0.3s;
+  "
+  onmouseover="this.style.backgroundColor='rgba(transparent)';"
+  onmouseout="this.style.backgroundColor='transparent';"
+>
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+    viewBox="0 0 24 24" width="24" height="24" aria-hidden="false" focusable="false">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="16" x2="12" y2="12" />
+    <line x1="12" y1="8" x2="12" y2="8" />
+  </svg>
+</button>
+
+  </div>
+</div>
+<!-- OVERLAY4: Sobre o App Movicel -->
+<div id="overlaySobreMovicel" style="
+  display: none;
+  position: fixed;
+  z-index: 9000;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.89);
+  color: #fff;
+  font-family: Arial, sans-serif;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  overflow-y: auto;
+">
+  <div style="
+    max-width: 410px;
+    margin: 48px auto 28px auto;
+    background: #1b1b29;
+    border-radius: 15px;
+    box-shadow: 0 0 22px 3px #0a090f;
+    padding: 34px 20px 26px 20px;
+    animation: fadeInScale 0.45s;
+  ">
+    <h2 style="color:#ffd700; margin-bottom: 12px; text-align:center;">Sobre o App de Recarga Movicel</h2>
+
+    <p style="line-height:1.6; text-align:center; margin-bottom:18px;">
+      <b>Este aplicativo não é oficial</b> da Movicel.<br>
+      Desenvolvido por <b>Sibem César</b> como uma solução independente para facilitar ou servir como <b>opção ágil</b> de recarga Movicel diretamente pelo seu smartphone.
+    </p>
+
+    <div style="background:#ffd60018; border-radius:8px; padding:11px 10px; margin:16px 0;">
+      <b>Como funciona?</b> <br>
+      O aplicativo utiliza códigos USSD oficiais da Movicel para fazer recargas rápidas.
+      <br>
+      Cada transação de recarga gera uma <span style="color:#ffd700;font-weight:bold;">taxa operacional de 15kz</span>. Para garantir velocidade e segurança, a <b>taxa total por recarga</b> fica em <span style="color:#ffd700;font-weight:bold;">50kz, Assim você ganha 35kz por cada recarga</span>.
+    </div>
+
+    <p style="font-size:1em; color:#90ee90; text-align:center; margin-bottom:16px;">
+      Lembre-se: <b>todos os usuários</b> são responsáveis por suas próprias recargas e pelas informações digitadas.
+    </p>
+
+    <p style="margin-bottom:14px; color:#f77782; text-align:center;">
+      Este app usa seu saldo atual pra poder transferir, e ela não armazena senhas, dados sigilosos ou dados bancários.<br>
+      Tudo é processado no próprio aparelho, apenas via comandos USSD.
+    </p>
+
+    <div style="text-align:center; margin-bottom:23px;">
+      <b>Dúvidas ou sugestões?</b><br>
+      Toque no botão abaixo para falar diretamente com o desenvolvedor.
+    </div>
+    <a href="tel:*611*914552107%23" style="
+      display: inline-block;
+      background: #42c2fc;
+      color:#1a1a1a;
+      font-weight:700;
+      font-size:1.08em;
+      border-radius:8px;
+      padding:10px 36px;
+      box-shadow: 0 2px 7px #0003;
+      transition: background 0.2s;
+      text-decoration: none;
+      margin-bottom: 10px;">
+      Falar com Sibem César
+    </a>
+
+    <div style="margin-top:30px; text-align:center;">
+      <button id="fecharSobreMovicel" style="
+        background: #ffd700;
+        color: #232333;
+        border: none;
+        border-radius: 7px;
+        font-size: 1em;
+        font-weight: bold;
+        padding: 10px 38px;
+        cursor: pointer;
+        margin-top:5px;
+        box-shadow: 0 0 12px #ffd70055;">
+        Fechar
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  @keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.87);}
+    to { opacity: 1; transform: scale(1);}
+  }
+</style>
+
+
+<div id="storageOverlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); z-index:1500; display:none; justify-content:center; align-items:center;">
+  <div style="background:#fff; color:#111; padding:24px 32px; border-radius:8px; max-width:300px; text-align:center; box-shadow:0 4px 16px rgba(0,0,0,0.3);">
+    <h2>Seu armazenamento</h2>
+    <div id="storagePercent" style="font-size:2.5em; font-weight:bold; margin:16px 0; color:#c20021;">0%</div>
+    <div style="font-size:0.9em; color:#555; margin-bottom: 20px;" id="storageBytes"></div>
+    <button id="btnCloseOverlay" style="background:#c20021; color:white; border:none; padding:8px 16px; border-radius:6px; cursor:pointer;">Fechar</button>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div class="subheader" id="subheader"></div>
+
+  <div class="content" id="content"></div>
+  <div id="loading" style="display:none;">
+    <div class="loading-bg">
+      <div class="circle-loader"></div>
+      <div class="loading-text">Processando recarga...</div>
+    </div>
+  </div>
+
+   <div class="footer" id="mainFooter">
+    <a class="footer-item" id="nav-home">
+      <svg viewBox="0 0 24 24"><path d="M12 2L3 9V20H9V14H15V20H21V9L12 2Z"/></svg>
+      <span>Recarga</span>
+    </a>
+    <a class="footer-item" id="nav-fisico">
+      <svg viewBox="0 0 24 24"><path d="M3,6V8H21V6M3,10V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V10H3Z"/></svg>
+      <span>Rec. Física</span>
+    </a>
+    <a class="footer-item" id="nav-history">
+      <svg viewBox="0 0 24 24"><path d="M13.5 13.5H11.5V7.5H13.5V13.5M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2M12 20C7.58 20 4 16.42 4 12C4 7.58 7.58 4 12 4C16.42 4 20 7.58 20 12C20 16.42 16.42 20 12 20Z"/></svg>
+      <span>Histórico</span>
+    </a>
+    <a class="footer-item" id="nav-contacts">
+      <svg viewBox="0 0 24 24"><path d="M12 2A5 5 0 0 0 7 7C7 9.87 12 16 12 16S17 9.87 17 7A5 5 0 0 0 12 2M12 12A2 2 0 0 1 10 10A2 2 0 0 1 12 8A2 2 0 0 1 14 10A2 2 0 0 1 12 12Z"/></svg>
+      <span>Contactos</span>
+    </a>
+  </div>
+  <script>
+    // Local Storage
+    const getHistory = () => JSON.parse(localStorage.getItem('recargaHistory') || '[]');
+    const saveHistory = (item) => {
+      const history = getHistory();
+      history.unshift(item);
+      localStorage.setItem('recargaHistory', JSON.stringify(history));
+    };
+  
+    const getContacts = () => JSON.parse(localStorage.getItem('recargaContacts') || '[]');
+    const saveContacts = (contacts) => localStorage.setItem('recargaContacts', JSON.stringify(contacts));
+    const addContact = (name, number) => {
+      const contacts = getContacts();
+      contacts.unshift({ name, number });
+      saveContacts(contacts);
+    };
+    const removeContact = (number) => {
+      let contacts = getContacts();
+      contacts = contacts.filter(contact => contact.number !== number);
+      saveContacts(contacts);
+    };
+
+    function setSubheader(txt) {
+      document.getElementById('subheader').innerText = txt || '';
+    }
+    function showErro(msg) {
+      document.getElementById('content').insertAdjacentHTML('beforeend', `<div class="erro">${msg}</div>`);
+    }
+    function clearErro() {
+      document.querySelectorAll('.erro').forEach(e=>e.remove());
+    }
+    function setActiveFooter(activeId) {
+      document.querySelectorAll('.footer-item').forEach(item => item.classList.remove('active'));
+      document.getElementById(activeId).classList.add('active');
+    }
+
+    // Dado temporário p/ recarga normal
+    let temp = { numero: '', valor: '', senha: '' };
+
+    // Recarga NORMAL
+    function renderTela1() {
+  setSubheader('');
+  setActiveFooter('nav-home');
+  clearErro();
+  document.getElementById('content').innerHTML = `
+    <!-- Card de Publicidade Automático -->
+<div id="publiCard" style="
+  width: 100%; 
+  height: 190px; 
+  margin-top: 35px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0px; 
+  box-shadow: 0 2px 18px rgba(0,0,0,0.22); 
+  background: #fff;
+  overflow:hidden;
+  ">
+  <img 
+    src="mov2.jpg" 
+    alt="Anúncio 1" 
+    id="publiImg"
+    style="width:100%; height:100%; object-fit:cover; border-radius:6px; transition: opacity 0.7s;"
+  >
+</div>
+   <div class="label">Digite o número Movicel:</div>
+    <form onsubmit="event.preventDefault(); nextTela1();" autocomplete="off">
+      <div class="input-group">
+  <span class="icon" aria-hidden="true">
+    <svg xmlns="http://www.w3.org/2000/svg" 
+         viewBox="0 0 24 24" 
+         fill="none" 
+         stroke-width="1.5" 
+         stroke="currentColor" 
+         width="28" height="28">
+      <path stroke-linecap="round" stroke-linejoin="round" 
+        d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
+    </svg>
+  </span>
+        <input type="tel" inputmode="numeric" maxlength="9" 
+          placeholder=" 91X XXX XXX" required id="numero" value="${temp.numero||''}">
+      </div>
+      <button class="btn-confirm" type="submit">
+        <svg viewBox="0 0 24 24"><path fill="white" d="M9.5 18.6L3.9 13L5.3 11.6L9.5 15.8L18.7 6.6L20.1 8Z"/></svg>
+        Avançar
+      </button>
+      <button class="btn-confirm" onclick="window.location.href = 'tel:*196%23'">
+  Consultar Meu Saldo
+</button>
+
+    </form>
+  `;
+}
+
+
+    function nextTela1() {
+      clearErro();
+      const num = document.getElementById('numero').value.trim().replace(/\D/g, '');
+      if(num.length !== 9 || !(num.startsWith('91') || num.startsWith('99') || num.startsWith('997') || num.startsWith('998'))) {
+        showErro('Digite um número válido (Movicel: 912 ou 998)');
+        return;
+      }
+      temp.numero = num;
+      renderTela2();
+    }
+
+    function renderTela2() {
+  setSubheader('Confirme os dados:');
+  setActiveFooter('nav-home');
+  clearErro();
+  const valoresRapidos = [200, 500, 1000, 2000];
+  document.getElementById('content').innerHTML = `
+    <div class="card-confirm" style="margin-bottom:22px;">
+      <span>Recarga directa</span>
+      <span style="color:#fff;background:rgba(255,255,255,.13);border-radius:6px;padding:2px 8px;">AKZ${temp.valor || ''}</span>
+      <span style="color:#fff;background:rgba(255,255,255,.13);border-radius:6px;padding:2px 8px;">${temp.numero}</span>
+    </div>
+    <div style="display:flex;gap:13px;justify-content:center;margin-bottom:9px;">
+      ${valoresRapidos.map(val => `
+        <button type="button" class="quick-value-btn" onclick="document.getElementById('valor').value=${val};">
+          AKZ ${val}
+        </button>
+      `).join('')}
+    </div>
+    <div class="label">Qual o valor da recarga?</div>
+    <form onsubmit="event.preventDefault(); nextTela2();" autocomplete="off">
+      <div class="input-group">
+  <span class="icon" aria-hidden="true">
+    <!-- seu SVG de cofre/banco/olho/chave, adaptando stroke à cor do tema -->
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" 
+         viewBox="0 0 24 24" stroke-width="1.5" 
+         stroke="currentColor" width="24" height="24">
+      <path stroke-linecap="round" stroke-linejoin="round" 
+        d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z"/>
+    </svg>
+</span>
+        <input type="number" min="10" placeholder=" 200" required id="valor" value="${temp.valor || ''}">
+      </div>
+      <button class="btn-confirm" type="submit">
+        <svg viewBox="0 0 24 24"><path fill="white" d="M9.5 18.6L3.9 13L5.3 11.6L9.5 15.8L18.7 6.6L20.1 8Z"/></svg>
+        Avançar
+      </button>
+    </form>
+  `;
+}
+
+
+    function nextTela2() {
+      clearErro();
+      const val = document.getElementById('valor').value.trim();
+      if(!val || Number(val) < 10) {
+        showErro('Valor mínimo de recarga é 10 AKZ.');
+        return;
+      }
+      temp.valor = val;
+      renderTela3();
+    }
+
+    function renderTela3() {
+      setSubheader('Confirme os dados:');
+      setActiveFooter('nav-home');
+      clearErro();
+      document.getElementById('content').innerHTML = `
+        <div class="card-confirm">
+          <span>Recarga</span>
+          <span>|</span>
+          <span style="color:#fff;background:rgba(255,255,255,.10);border-radius:5px;padding:2px 7px;">AKZ${temp.valor}</span>
+          <span>|</span>
+          <span>${temp.numero}</span>
+        </div>
+        <div class="label">Introduza o seu PIN para concluir a operação:</div>
+        <form id="pinForm" onsubmit="event.preventDefault(); finalizarCompra();" autocomplete="off">
+          <div class="input-group">
+            <span class="icon">&#128273;</span>
+            <input type="Password" required minlength="4" maxlength="6" id="senha" autocomplete="new-password">
+            <button class="toggle-visibility" type="button" onclick="toggleSenha()" tabindex="-1">&#128065;</button>
+          </div>
+          <button class="btn-confirm" type="submit" id="btnEnviar">
+            <svg viewBox="0 0 24 24"><path fill="white" d="M9.5 18.6L3.9 13L5.3 11.6L9.5 15.8L18.7 6.6L20.1 8Z"/></svg>
+            Enviar
+          </button>
+        </form>
+      `;
+    }
+
+    function toggleSenha() {
+      const input = document.getElementById('senha');
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    function finalizarCompra() {
+      clearErro();
+      const senha = document.getElementById('senha').value.trim();
+      if(senha.length < 4) {
+        showErro('PIN deve ter pelo menos 4 dígitos.');
+        return;
+      }
+      // PIN para simulação
+      if(senha !== '8989') {
+        showErro('PIN incorreto!');
+        return;
+      }
+      document.getElementById('loading').style.display = '';
+      setTimeout(()=> {
+        document.getElementById('loading').style.display = 'none';
+        saveHistory({
+          numero: temp.numero, valor: temp.valor,
+          data: new Date().toLocaleString()
+        });
+        // Africell: *555*número*valor#
+        // Movicel: *677*número*valor#
+        let comando = temp.numero.startsWith('91')||temp.numero.startsWith('99')
+          ? `*677*${temp.numero}*${temp.valor}%23`
+          : `*677*${temp.numero}*${temp.valor}%23`;
+        comando = comando.replace(/\s+/g,'');
+        location.href = `tel:${comando}`;
+        temp = { numero:'', valor:'', senha:'' };
+        setTimeout(renderTela1, 1200);
+      }, 1500);
+    }
+
+    // Recarga FÍSICA (cartão)
+    function renderRecargaFisica() {
+  setSubheader('');
+  setActiveFooter('nav-fisico');
+  clearErro();
+
+  // Pega a lista de cartões do localStorage (array string):
+  const savedCards = JSON.parse(localStorage.getItem('fisicoCards') || '[]');
+
+  document.getElementById('content').innerHTML = `
+    <div class="label">Digite o número do cartão:</div>
+    <form id="formRecargaFisica" onsubmit="event.preventDefault(); nextRecargaFisica();" autocomplete="off">
+      <div class="input-group" style="align-items:center;">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+          viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="53" height="26">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"/>
+        </svg>
+        <input type="tel" inputmode="numeric" maxlength="13" minlength="13"
+          placeholder="Número do cartão" required id="numCartao" style="flex-grow:1; margin-left:6px;">
+    
+      </div>
+
+      
+
+      <div class="label" style="margin-top:15px;">Digite o número:</div>
+      <div class="input-group">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="53" height="26" class="size-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
+        </svg>
+        <input type="tel" inputmode="numeric" maxlength="9"
+          placeholder="Movicel: 91X XXX XXX" required id="numRecarga" value="">
+      </div>
+      <button class="btn-confirm" type="submit" style="margin-top:12px;">
+        <svg viewBox="0 0 24 24"><path fill="white" d="M9.5 18.6L3.9 13L5.3 11.6L9.5 15.8L18.7 6.6L20.1 8Z"/></svg>
+        Enviar
+      </button>     
+      <button type="button" class="btn-confirm" id="btnSaveCard" style="margin-left:8px; white-space: nowrap;">
+          Salvar Cartão
+        </button>
+      <div class="label" style="margin-top:15px;">Cartões salvos:</div>
+      <div id="savedCardsList" style="max-height: 150px; overflow-y: auto; margin-bottom: 10px;">
+        ${savedCards.length === 0 ? '<p style="color:#888;">Nenhum cartão salvo.</p>' : ''}
+        <ul style="list-style:none; padding-left:0; margin:0;">
+          ${savedCards.map((card, idx) => `
+            <li style="display:flex; justify-content: space-between; align-items:center; margin-bottom:4px; padding:5px 8px; background:#f0f0f0; border-radius: 4px;">
+              <span class="use-card" data-card="${card}" style="cursor:pointer; user-select:none;">${card}</span>
+              <button type="button" class="btn-delete-card" data-idx="${idx}" aria-label="Apagar cartão ${card}"
+                style="background:#d9534f; color:white; border:none; border-radius: 3px; cursor:pointer; padding: 0 6px; font-weight:bold;">&times;</button>
+            </li>
+          `).join('')}
+        </ul>
+      </div>
+    </form>
+  `;
+
+  // Evento para salvar novo cartão
+  document.getElementById('btnSaveCard').addEventListener('click', () => {
+    clearErro();
+    const newCard = document.getElementById('numCartao').value.trim().replace(/\D/g, '');
+    if(newCard.length !== 13) {
+      showErro('O cartão deve ter exatamente 13 dígitos para salvar.');
+      return;
+    }
+    if(savedCards.includes(newCard)) {
+      showErro('Esse cartão já está salvo.');
+      return;
+    }
+    savedCards.push(newCard);
+    localStorage.setItem('fisicoCards', JSON.stringify(savedCards));
+    showErro('Cartão salvo com sucesso.', 'success');
+    renderRecargaFisica(); // Re-renderiza para atualizar a lista e limpar input
+  });
+
+  // Evento para preencher o cartão ao clicar nele
+  document.querySelectorAll('.use-card').forEach(span => {
+    span.addEventListener('click', () => {
+      document.getElementById('numCartao').value = span.getAttribute('data-card');
+      clearErro();
+    });
+  });
+
+  // Evento para apagar cartão
+  document.querySelectorAll('.btn-delete-card').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.getAttribute('data-idx'), 10);
+      savedCards.splice(idx, 1);
+      localStorage.setItem('fisicoCards', JSON.stringify(savedCards));
+      showErro('Cartão removido.', 'success');
+      renderRecargaFisica();
+    });
+  });
+}
+function nextRecargaFisica() {
+  clearErro();
+  const cartao = document.getElementById('numCartao').value.trim().replace(/\D/g, '');
+  const num = document.getElementById('numRecarga').value.trim().replace(/\D/g, '');
+
+  if(cartao.length !== 13) {
+    showErro('Digite o cartão correto (13 dígitos).');
+    return;
+  }
+  if(num.length !== 9 || !(num.startsWith('91')||num.startsWith('99')||num.startsWith('997')||num.startsWith('998'))) {
+    showErro('Número deve começar com 91/99.');
+    return;
+  }
+  
+  document.getElementById('loading').style.display = '';
+  setTimeout(()=>{
+    document.getElementById('loading').style.display = 'none';
+    
+    let comando = `*198*${cartao}*${num}#`;
+    let telComando = encodeURIComponent(comando);
+    
+    location.href = `tel:${telComando}`;
+    
+    renderRecargaFisica();
+  }, 900);
+}
+
+    // HISTÓRICO
+
+    function renderHistory() {
+  setSubheader('Histórico de Recargas');
+  setActiveFooter('nav-history');
+  clearErro();
+  const history = getHistory();
+  // total em vendas (com taxa, igual mostrado em cada item)
+  const totalVendas = history.reduce((s, item) => s + Number(item.valor || 0) + 50, 0);
+  let html = '';
+  if(history.length === 0) {
+    html = '<p class="empty-list-message">Nenhuma recarga realizada ainda.</p>';
+  } else {
+    // Card de total de vendas no topo
+    html = `
+      <div class="valor-total-card" style="
+        background:#2F002F;
+        color:#fff;
+        font-weight:bold;
+        border-radius:13px;
+        font-size:1.14em;
+        margin:23px auto 18px auto;
+        text-align:center;
+        max-width:390px;
+        padding:15px 0;
+        letter-spacing:0.02em;
+        box-shadow:0 2px 8px #12b2b122;
+      ">
+        Total de vendas: AKZ ${totalVendas}
+      </div>
+      <button class="btn-clear-all" onclick="clearAllHistory()">Limpar Tudo</button>
+      <div class="list-container">
+    `;
+    history.slice().reverse().forEach((item, idx) => {
+      const valorTotal = Number(item.valor || 0) + 50;
+      html += `
+        <div class="list-item">
+          <div class="list-item-info">
+            <strong>+244 ${item.numero}</strong>
+            <span>AKZ ${valorTotal} <small style="color:#c20021;">(incl. taxa 50)</small></span>
+            <span>${item.data}</span>
+          </div>
+          <div class="list-item-actions">
+            <button onclick="removeHistoryItem(${idx})">Apagar</button>
+          </div>
+        </div>`;
+    });
+    html += '</div>';
+  }
+  document.getElementById('content').innerHTML = html;
+}
+
+
+
+// Funções para apagar:
+function removeHistoryItem(idx) {
+  const history = getHistory();
+  history.splice(idx, 1);
+  localStorage.setItem('recargaHistory', JSON.stringify(history));
+  renderHistory();
+}
+function clearAllHistory() {
+  if (confirm('Deseja apagar todo o histórico?')) {
+    localStorage.removeItem('recargaHistory');
+    renderHistory();
+  }
+}
+
+
+    // CONTACTOS
+    function renderContacts() {
+      setSubheader('Contactos Salvos');
+      setActiveFooter('nav-contacts');
+      clearErro();
+      const contacts = getContacts();
+      let contactsHtml = `
+        <div class="list-container">
+          <button type="button" id="toggleAddContactBtn" class="toggle-contact-btn" onclick="toggleAddContactForm()">Criar Contacto</button>
+<div id="addContactWrapper" class="add-contact-wrapper">
+  <form onsubmit="event.preventDefault(); addContactFromForm();" class="add-contact-form">
+    <input type="text" id="contactName" placeholder="Nome do Contacto" required>
+    <input type="tel" inputmode="numeric" maxlength="9" id="contactNumber" placeholder="Número (91X XXX XXX)" required>
+    <button type="submit">Adicionar Contacto</button>
+  </form>
+  <div id="erroContact" class="erro" style="display:none;"></div>
+</div> `;
+      if(contacts.length === 0) {
+        contactsHtml += '<p class="empty-list-message">Nenhum contacto salvo.</p>';
+      } else {
+        contacts.forEach(contact => {
+          contactsHtml += `
+            <div class="list-item">
+              <div class="list-item-info">
+                <strong>${contact.name}</strong>
+                <span>+244 ${contact.number}</span>
+              </div>
+              <div class="list-item-actions">
+                <button onclick="removeContactAndRender('${contact.number}')">Remover</button>
+                <button onclick="useContactForRecarga('${contact.number}')">Usar</button>
+              </div>
+            </div>
+          `;
+        });
+      }
+      contactsHtml += '</div>';
+      document.getElementById('content').innerHTML = contactsHtml;
+      
+        // >>>>>>> Aplicar o estado salvo <<<<<<<
+  const showContactForm = localStorage.getItem('showAddContact');
+  const wrapper = document.getElementById('addContactWrapper');
+  const btn = document.getElementById('toggleAddContactBtn');
+  if (showContactForm === '0') {
+    wrapper.classList.add('hide');
+    btn.textContent = 'Criar Contacto';
+  } else {
+    wrapper.classList.remove('hide');
+    btn.textContent = 'Fechar';
+  }
+    }
+    function addContactFromForm() {
+      clearErro();
+      const name = document.getElementById('contactName').value.trim();
+      const number = document.getElementById('contactNumber').value.trim().replace(/\D/g, '');
+      if(!name) { showErro('Nome do contacto não pode ser vazio.'); return; }
+      if(number.length !== 9 || !(number.startsWith('91')||number.startsWith('99')||number.startsWith('997')||number.startsWith('998'))) {
+        showErro('Número deve começar com 91/99/997/998.');
+        return;
+      }
+      const contacts = getContacts();
+      if(contacts.some(c=>c.number===number)) {
+        showErro('Este número já está salvo nos contactos.'); return;
+      }
+      addContact(name, number);
+      renderContacts();
+    }
+    function removeContactAndRender(number) { removeContact(number); renderContacts(); }
+    function useContactForRecarga(number) { temp.numero=number; renderTela1(); }
+    
+    document.getElementById('nav-home').addEventListener('click', renderTela1);
+    document.getElementById('nav-fisico').addEventListener('click', renderRecargaFisica);
+    document.getElementById('nav-history').addEventListener('click', renderHistory);
+    document.getElementById('nav-contacts').addEventListener('click', renderContacts);
+
+    renderTela1();
+
+function getTotalRecargas() {
+  const history = getHistory();
+  // Somar os valores (convertendo string para número se necessário)
+  return history.reduce((total, recarga) => total + Number(recarga.valor || 0), 0);
+}
+
+// Exemplo para exibir em algum lugar da sua tela:
+const totalAkz = getTotalRecargas();
+document.getElementById('valorTotal').innerText = `Total recarregado: AKZ ${totalAkz}`;
+
+let currentSlide = 0;
+function moveCarousel(dir) {
+  const slides = document.querySelectorAll('.carousel-slide');
+  currentSlide = (currentSlide + dir + slides.length) % slides.length;
+  document.querySelector('.carousel-track').style.transform = 
+    `translateX(-${currentSlide * 100}%)`;
+}
+// (Opcional:) Rolagem automática a cada 4 segundos:
+setInterval(()=>moveCarousel(1), 4000);
+
+// Função para mostrar/esconder e guardar o estado no localStorage
+function toggleAddContactForm() {
+  const wrapper = document.getElementById('addContactWrapper');
+  const btn = document.getElementById('toggleAddContactBtn');
+  const hidden = wrapper.classList.toggle('hide');
+  localStorage.setItem('showAddContact', hidden ? '0' : '1');
+  btn.textContent = hidden ? 'Criar Contacto' : 'Fechar';
+}
+  </script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const footer = document.getElementById('mainFooter');
+    const btn = document.getElementById('toggleFooterBtn');
+
+    // Ao carregar, aplicar estado salvo (mostrar/ocultar)
+    const savedState = localStorage.getItem('showFooter');
+    if (savedState === 'hidden') {
+      footer.classList.add('hide');
+    } else {
+      footer.classList.remove('hide');
+    }
+
+    btn.addEventListener('click', () => {
+      const isHidden = footer.classList.toggle('hide');
+      // Salva no localStorage
+      localStorage.setItem('showFooter', isHidden ? 'hidden' : 'visible');
+    });
+  });
+</script>
+<script>
+  // Limite estimado localStorage em bytes (5MB)
+  const LS_LIMIT_BYTES = 5 * 1024 * 1024;
+
+  function getLocalStorageSize() {
+    let total = 0;
+    for(let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      const value = localStorage.getItem(key);
+      // + key + value em characters
+      total += (key.length + value.length);
+    }
+    // assumindo 2 bytes por caractere (UTF-16)
+    return total * 2;
+  }
+
+  function updateStorageInfo() {
+    const sizeBytes = getLocalStorageSize();
+    const percent = Math.min(100, (sizeBytes / LS_LIMIT_BYTES) * 100).toFixed(1);
+    document.getElementById('storagePercent').textContent = `${percent}%`;
+    document.getElementById('storageBytes').textContent = `${(sizeBytes / 1024).toFixed(1)} KB de ${(LS_LIMIT_BYTES / 1024).toFixed(0)} KB usados`;
+  }
+
+  document.getElementById('btnShowStorage').addEventListener('click', () => {
+    updateStorageInfo();
+    document.getElementById('storageOverlay').style.display = 'flex';
+  });
+
+  document.getElementById('btnCloseOverlay').addEventListener('click', () => {
+    document.getElementById('storageOverlay').style.display = 'none';
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const img = document.getElementById('imgAboutMe');
+    const overlay = document.getElementById('overlayAboutMe');
+    const btnClose = document.getElementById('btnCloseAbout');
+
+    let pressTimer;
+
+    // Inicia o timer para detectar pressionamento longo (3 segundos)
+    img.addEventListener('mousedown', startPress);
+    img.addEventListener('touchstart', startPress);
+
+    // Cancela se soltar ou sair
+    img.addEventListener('mouseup', cancelPress);
+    img.addEventListener('mouseleave', cancelPress);
+    img.addEventListener('touchend', cancelPress);
+    img.addEventListener('touchcancel', cancelPress);
+
+    function startPress(e) {
+      // Evita seleção padrão de texto etc
+      e.preventDefault();
+      pressTimer = setTimeout(() => {
+        overlay.style.display = 'block';
+      }, 100);  // 100ms = 2 segundos
+    }
+
+    function cancelPress() {
+      clearTimeout(pressTimer);
+    }
+
+    // Fechar overlay ao clicar no botão
+    btnClose.addEventListener('click', () => {
+      overlay.style.display = 'none';
+    });
+  });
+</script>
+<script>
+  // Troca automática de imagens do card de publicidade
+  document.addEventListener('DOMContentLoaded', function(){
+    var imagens = [
+      "mov2.jpg", // Substitua pelos caminhos reais
+      "mov3.jpg",
+      "mov.jpg"
+    ];
+    var idx = 0;
+    var publiImg = document.getElementById('publiImg');
+    setInterval(function(){
+      publiImg.style.opacity = 0;
+      setTimeout(function(){
+        idx = (idx + 1) % imagens.length;
+        publiImg.src = imagens[idx];
+        publiImg.style.opacity = 1;
+      }, 700); // tempo da transição de fade (deve combinar com o CSS transition)
+    }, 4000); // a cada 4 segundos (mude o tempo à vontade)
+  });
+</script>
+<script>
+  // Função para abrir e fechar o novo overlay4 sobre o app Movicel
+  document.getElementById('btnSobreMovicel').onclick = function() {
+    document.getElementById('overlaySobreMovicel').style.display = 'block';
+  };
+  document.getElementById('fecharSobreMovicel').onclick = function() {
+    document.getElementById('overlaySobreMovicel').style.display = 'none';
+  };
+  // ESC fecha overlay (opcional)
+  document.addEventListener('keydown', function(e){
+    if(e.key === "Escape"){
+      document.getElementById('overlaySobreMovicel').style.display = 'none';
+    }
+  });
+</script>
+</body>
+</html>
